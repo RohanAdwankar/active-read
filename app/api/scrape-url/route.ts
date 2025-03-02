@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import * as cheerio from 'cheerio';
+import { PDFLoader } from '@langchain/community/document_loaders/fs/pdf';
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,6 +35,20 @@ export async function POST(req: NextRequest) {
         { error: `Failed to fetch URL: ${response.statusText}` },
         { status: 500 }
       );
+    }
+
+    const contentType = response.headers.get('content-type') || '';
+
+    if (contentType.includes('application/pdf')) {
+      // Convert response to a Blob
+      const pdfBlob = await response.blob();
+      const loader = new PDFLoader(pdfBlob, { splitPages: false });
+
+      // Load text from the PDF
+      const docs = await loader.load();
+      const text = docs.map(doc => doc.pageContent).join("\n\n");
+
+      return NextResponse.json({ text });
     }
 
     const html = await response.text();
