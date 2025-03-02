@@ -9,7 +9,7 @@ interface Word {
 
 export async function POST(req: NextRequest) {
   try {
-    const { text } = await req.json();
+    const { text, blankFrequency = 15, onlyImportantWords = true } = await req.json();
     
     if (!text || typeof text !== 'string') {
       return NextResponse.json(
@@ -29,13 +29,23 @@ export async function POST(req: NextRequest) {
       isBlank: false
     }));
     
-    // Identify candidate words for blanking out (words with 4+ characters)
-    const candidates = words.filter(word => 
-      /^[a-zA-Z]{4,}$/.test(word.text) && !isCommonWord(word.text)
-    );
+    // Determine candidates based on the onlyImportantWords setting
+    let candidates: Word[];
     
-    // Select ~15% of candidate words randomly to blank out
-    const numberOfBlanks = Math.max(5, Math.floor(candidates.length * 0.15));
+    if (onlyImportantWords) {
+      // Filter for important words (longer than 3 chars and not common)
+      candidates = words.filter(word => 
+        /^[a-zA-Z]{4,}$/.test(word.text) && !isCommonWord(word.text)
+      );
+    } else {
+      // Consider all actual words (not punctuation or whitespace)
+      candidates = words.filter(word => /^[a-zA-Z]+$/.test(word.text));
+    }
+    
+    // Use the blankFrequency parameter from the request
+    const frequency = blankFrequency / 100;
+    const numberOfBlanks = Math.max(5, Math.floor(candidates.length * frequency));
+    
     const shuffled = [...candidates].sort(() => 0.5 - Math.random());
     const selectedForBlanks = shuffled.slice(0, numberOfBlanks);
     

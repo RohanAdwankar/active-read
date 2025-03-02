@@ -18,7 +18,8 @@ export default function Reader() {
   const [processedText, setProcessedText] = useState<Word[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<Settings>({
-    blankFrequency: 15 // default 15%
+    blankFrequency: 15, // default 15%
+    onlyImportantWords: true // default to only removing important words
   });
   
   const handleTextSubmit = async (text: string) => {
@@ -31,7 +32,8 @@ export default function Reader() {
         },
         body: JSON.stringify({ 
           text, 
-          blankFrequency: settings.blankFrequency 
+          blankFrequency: settings.blankFrequency,
+          onlyImportantWords: settings.onlyImportantWords 
         }),
       });
       
@@ -53,10 +55,11 @@ export default function Reader() {
 
   return (
     <div className="container mx-auto px-4 relative">
-      {/* Settings gear icon - always visible */}
+      {/* Settings gear icon - now with disabled state */}
       <SettingsBar 
         settings={settings} 
-        onSettingsChange={setSettings} 
+        onSettingsChange={setSettings}
+        disabled={!!processedText || loading} 
       />
       
       {!processedText && !loading && (
