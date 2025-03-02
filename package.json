@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@langchain/community": "^0.3.33",
+    "@langchain/core": "^0.3.42",
     "cheerio": "^1.0.0",
     "langchain": "^0.3.19",
     "next": "15.2.0",

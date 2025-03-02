@@ -40,7 +40,7 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
     <div className={isParagraph ? "" : "w-full max-w-3xl mx-auto my-8"}>
       <div className={`bg-white p-6 rounded-lg ${!isParagraph ? 'shadow' : ''}`}>
         <div className="text-lg leading-relaxed mb-4">
-          {words.map((word, index) => (
+          {words.map((word) => (
             <span key={word.id} className="mr-1">
               {word.isBlank ? (
                 <span className="inline-block">
