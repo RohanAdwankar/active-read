@@ -100,6 +100,11 @@ export default function Reader() {
                 </div>
               </div>
             </div>
+
+            <br />
+            <div className="text-center">
+              <button onClick={() => {}}>I'm feeling lucky</button>
+            </div>
           </div>
         </div>
       )}
