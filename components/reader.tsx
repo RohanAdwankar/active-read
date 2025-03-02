@@ -22,8 +22,9 @@ export default function Reader() {
     blankFrequency: 15, // default 15%
     onlyImportantWords: true // default to only removing important words
   });
-  
-  const handleTextSubmit = async (text: string) => {
+  const [title, setTitle] = useState<string>("Active Reader");
+
+  const handleTextSubmit = async (text: string, _title: string = "Active Reader") => {
     setLoading(true);
     try {
       const response = await fetch('/api/process-text', {
@@ -37,6 +38,7 @@ export default function Reader() {
           onlyImportantWords: settings.onlyImportantWords 
         }),
       });
+      setTitle(_title);
       
       if (!response.ok) throw new Error('Failed to process text');
       
@@ -49,6 +51,30 @@ export default function Reader() {
       setLoading(false);
     }
   };
+
+  const handleFeelingLucky = async () => {
+    setLoading(true);
+    // fetch random Wikipedia article from /api/feeling-lucky
+    try {
+      const response = await fetch('/api/feeling-lucky', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch random article');
+      
+      const result = await response.json();
+      handleTextSubmit(result.content, result.title);
+      setTitle(result.title);
+    } catch (error) {
+      console.error('Error fetching random article:', error);
+      alert('Failed to fetch random article. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const handleReset = () => {
     setProcessedText(null);
@@ -103,7 +129,7 @@ export default function Reader() {
 
             <br />
             <div className="text-center">
-              <button onClick={() => {}}>I'm feeling lucky</button>
+              <button onClick={handleFeelingLucky}>I'm feeling lucky</button>
             </div>
           </div>
         </div>
@@ -120,6 +146,7 @@ export default function Reader() {
           processedText={processedText}
           onBack={handleReset}
           settings={settings}
+          pageTitle={title}
         />
       )}
     </div>

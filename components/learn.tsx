@@ -13,9 +13,10 @@ interface LearnProps {
   processedText: Word[];
   onBack: () => void;
   settings?: Settings;
+  pageTitle?: string;
 }
 
-export default function Learn({ processedText, onBack, settings }: LearnProps) {
+export default function Learn({ processedText, onBack, settings, pageTitle }: LearnProps) {
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeParagraph, setActiveParagraph] = useState<number | null>(null);
   const [score, setScore] = useState<{correct: number, total: number} | null>(null);
@@ -65,7 +66,7 @@ export default function Learn({ processedText, onBack, settings }: LearnProps) {
             </button>
           </div>
           
-          <h2 className="text-2xl font-bold mb-6">Active Reading</h2>
+          <h2 className="text-2xl font-bold mb-6">{ (pageTitle) ? pageTitle : "Active Reading" }</h2>
           
           {settings && (
             <div className="inline-block bg-gray-100 rounded-md px-3 py-1 text-sm text-gray-600 mb-6 select-none">
