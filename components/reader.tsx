@@ -5,6 +5,7 @@ import TextInput from './text-input';
 import FileInput from './file-input';
 import UrlInput from './url-input';
 import Learn from './learn';
+import SettingsBar, { Settings } from './settings-bar';
 
 interface Word {
   id: number;
@@ -16,6 +17,9 @@ interface Word {
 export default function Reader() {
   const [processedText, setProcessedText] = useState<Word[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [settings, setSettings] = useState<Settings>({
+    blankFrequency: 15 // default 15%
+  });
   
   const handleTextSubmit = async (text: string) => {
     setLoading(true);
@@ -25,7 +29,10 @@ export default function Reader() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ 
+          text, 
+          blankFrequency: settings.blankFrequency 
+        }),
       });
       
       if (!response.ok) throw new Error('Failed to process text');
@@ -45,9 +52,17 @@ export default function Reader() {
   };
 
   return (
-    <div className="container mx-auto px-4">
+    <div className="container mx-auto px-4 relative">
+      {/* Settings gear icon - always visible */}
+      <SettingsBar 
+        settings={settings} 
+        onSettingsChange={setSettings} 
+      />
+      
       {!processedText && !loading && (
         <div className="max-w-5xl mx-auto">
+          <h1 className="text-3xl font-bold text-gray-800 text-center mb-8">Active Reading Exercise</h1>
+          
           <div className="flex flex-col md:flex-row gap-8">
             <div className="flex-1">
               <div className="bg-white p-6 rounded-lg shadow-md h-full">
@@ -89,6 +104,7 @@ export default function Reader() {
         <Learn 
           processedText={processedText}
           onBack={handleReset}
+          settings={settings}
         />
       )}
     </div>
