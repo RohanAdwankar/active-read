@@ -63,33 +63,41 @@ function extractTextFromHTML(html: string): string {
     '#content', '.main-content', '[role="main"]'
   ];
   
-  let $content = $('body');
+  // Extract text differently to avoid type errors
+  let contentText = "";
+  let foundMainContent = false;
   
-  // Try to find main content element
+  // Try to find main content in one of our preferred selectors
   for (const selector of contentSelectors) {
     if ($(selector).length > 0) {
-      // Select the first matching element
-      $content = $(selector).first();
+      contentText = $(selector).text();
+      foundMainContent = true;
       break;
     }
   }
   
-  // Get text and clean it
-  let text = $content.text()
+  // If we didn't find any main content, use the body
+  if (!foundMainContent) {
+    contentText = $('body').text();
+  }
+  
+  // Clean up the text
+  let text = contentText
     .replace(/\s+/g, ' ')
     .replace(/\n+/g, '\n\n')
     .trim();
   
-  // If the content is too short (probably failed to find main content),
-  // fall back to full body
-  if (text.length < 500 && $content.is('body')) {
+  // If the content is too short, fall back to paragraphs
+  if (text.length < 500) {
     // Try using paragraphs instead
     const paragraphs = $('p')
       .map((i, el) => $(el).text().trim())
       .get()
-      .filter(p => p.length > 20); // Only keep non-empty paragraphs
+      .filter(p => p.length > 20); // Only keep meaningful paragraphs
     
-    text = paragraphs.join('\n\n');
+    if (paragraphs.length > 0) {
+      text = paragraphs.join('\n\n');
+    }
   }
   
   return text;
