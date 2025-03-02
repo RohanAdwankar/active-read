@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 interface Word {
   id: number;
   text: string;
+  submitted: boolean;
   isBlank: boolean;
   originalWord?: string;
 }
@@ -39,7 +40,7 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
     <div className={isParagraph ? "" : "w-full max-w-3xl mx-auto my-8"}>
       <div className={`bg-white p-6 rounded-lg ${!isParagraph ? 'shadow' : ''}`}>
         <div className="text-lg leading-relaxed mb-4">
-          {words.map((word) => (
+          {words.map((word, index) => (
             <span key={word.id} className="mr-1">
               {word.isBlank ? (
                 <span className="inline-block">
@@ -47,17 +48,44 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
                     type="text"
                     value={word.text}
                     onChange={(e) => handleInputChange(word.id, e.target.value)}
-                    className={`w-${Math.max(5, word.originalWord?.length || 0) * 8}px border-b-2 text-center mx-1 
-                      ${submitted 
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === 'Tab') {
+                        e.preventDefault();
+                    
+                        setWords((prevWords) =>
+                          prevWords.map((w) =>
+                            w.id === word.id ? { ...w, submitted: true } : w
+                          )
+                        );
+                    
+                        // Find the next blank input field
+                        const blanks = words.filter(w => w.isBlank);
+                        const currentIndex = blanks.findIndex(w => w.id === word.id);
+                        const nextWord = blanks[currentIndex + 1];
+                    
+                        if (nextWord) {
+                          const nextInput = document.getElementById(`input-${nextWord.id}`);
+                          if (nextInput) {
+                            (nextInput as HTMLInputElement).focus();
+                          }
+                        } else {
+                          handleSubmit();
+                        }
+                      }
+                    }}
+                    id={`input-${word.id}`}
+                    
+                    className={`w-${Math.max(5, word.originalWord?.length || 0) * 8}px border-b-2 text-left pl-2 mx-1 
+                      ${word.submitted 
                         ? word.text.toLowerCase() === word.originalWord?.toLowerCase()
                           ? 'border-green-500 bg-green-100'
                           : 'border-red-500 bg-red-100'
                         : 'border-gray-400'}`}
-                    disabled={submitted}
-                    size={Math.max(5, word.originalWord?.length || 0)}
+                    disabled={word.submitted}
+                    size={Math.max(10, word.originalWord?.length || 0)}
                   />
-                  {submitted && word.text.toLowerCase() !== word.originalWord?.toLowerCase() && (
-                    <span className="text-xs text-red-600 block">{word.originalWord}</span>
+                  {word.submitted && word.text.toLowerCase() !== word.originalWord?.toLowerCase() && (
+                    <span className="text-xs text-red-600 block pl-2">{word.originalWord}</span>
                   )}
                 </span>
               ) : (
