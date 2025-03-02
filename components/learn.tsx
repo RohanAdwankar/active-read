@@ -163,7 +163,7 @@ function groupIntoParagraphs(words: Word[]): Word[][] {
   words.forEach((word) => {
     currentParagraph.push(word);
     
-    // If word has a newline or period followed by space, end paragraph
+    // If word has a newline, end paragraph
     if (word.text === '\n') {
       if (currentParagraph.length > 10) { // Ensure paragraph has reasonable length
         paragraphs.push([...currentParagraph]);
@@ -177,9 +177,12 @@ function groupIntoParagraphs(words: Word[]): Word[][] {
     paragraphs.push(currentParagraph);
   }
   
-  // If we ended up with no paragraphs or just one tiny one, 
-  // just treat the whole text as one paragraph
+  // If we ended up with no paragraphs or just one very large paragraph,
+  // split the content into reasonable chunks
   if (paragraphs.length === 0 || (paragraphs.length === 1 && words.length > 100)) {
+    // Clear existing paragraphs to avoid duplication
+    paragraphs.length = 0;
+    
     // Split into chunks of approximately 100-150 words
     const chunkSize = 150;
     for (let i = 0; i < words.length; i += chunkSize) {
