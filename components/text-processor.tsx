@@ -2,13 +2,7 @@
 
 import { useState, useRef } from 'react';
 
-interface Word {
-  id: number;
-  text: string;
-  submitted: boolean;
-  isBlank: boolean;
-  originalWord?: string;
-}
+import {Word} from '../types';
 
 interface TextProcessorProps {
   processedText: Word[];

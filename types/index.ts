@@ -50,3 +50,11 @@ export interface SearchResult {
   text: string;
   score: number;
 }
+
+export interface Word {
+  id: number;
+  text: string;
+  submitted: boolean;
+  isBlank: boolean;
+  originalWord?: string;
+}

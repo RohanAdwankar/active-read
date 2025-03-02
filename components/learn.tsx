@@ -6,13 +6,8 @@ import Quiz from './quiz';
 import Chat from './chat';
 import Summary from './summary';
 import { Settings } from './settings-bar';
+import { Word } from '../types';
 
-interface Word {
-  id: number;
-  text: string;
-  isBlank: boolean;
-  originalWord?: string;
-}
 
 interface LearnProps {
   processedText: Word[];
