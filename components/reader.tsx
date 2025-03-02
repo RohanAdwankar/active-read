@@ -12,6 +12,7 @@ interface Word {
   text: string;
   isBlank: boolean;
   originalWord?: string;
+  submitted: boolean;
 }
 
 export default function Reader() {
@@ -150,4 +151,37 @@ export default function Reader() {
       )}
     </div>
   );
+}
+
+// Find the section of code that creates the processedText array and update it
+function processText(text: string, blankFrequency: number): Word[] {
+  // Split text into words while preserving whitespace and punctuation
+  const regex = /(\s+|[,.!?;:]|[^\s,.!?;:]+)/g;
+  const tokens = text.match(regex) || [];
+  
+  let wordIndex = 0;
+  let id = 0;
+  const processedWords: Word[] = [];
+  
+  tokens.forEach((token) => {
+    // Ignore empty tokens
+    if (!token) return;
+    
+    const isWord = /\w+/.test(token);
+    const isBlank = isWord && 
+      Math.random() < (blankFrequency / 100) && 
+      token.length > 3; // Only blank out words longer than 3 chars
+    
+    processedWords.push({
+      id: id++,
+      text: isBlank ? '_'.repeat(token.length) : token,
+      isBlank: isBlank,
+      originalWord: isBlank ? token : undefined,
+      submitted: false
+    });
+    
+    if (isWord) wordIndex++;
+  });
+  
+  return processedWords;
 }
