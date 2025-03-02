@@ -162,38 +162,95 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
 function groupIntoParagraphs(words: Word[]): Word[][] {
   const paragraphs: Word[][] = [];
   let currentParagraph: Word[] = [];
+  let charCount = 0;
+  const minCharThreshold = 150; // Minimum chars for a paragraph
   
   words.forEach((word) => {
-    currentParagraph.push(word);
-    
-    // If word has a newline, end paragraph
-    if (word.text === '\n') {
-      if (currentParagraph.length > 10) { // Ensure paragraph has reasonable length
+    if (word.text !== '\n') {
+      currentParagraph.push(word);
+      charCount += word.text.length;
+    } else {
+      // When we encounter a newline
+      
+      // Always add the newline for visual separation
+      // Creating a copy of the newline word to ensure paragraph separation is visible
+      currentParagraph.push({...word});
+      
+      // Only create a new paragraph if we've accumulated enough content
+      if (charCount >= minCharThreshold) {
         paragraphs.push([...currentParagraph]);
         currentParagraph = [];
+        charCount = 0;
       }
+      // Otherwise, we keep the current paragraph going (with the added newline)
     }
   });
   
-  // Add any remaining text as the last paragraph
-  if (currentParagraph.length > 0) {
+  // Add any remaining text as the last paragraph if it's not empty
+  if (currentParagraph.length > 0 && charCount > 0) {
     paragraphs.push(currentParagraph);
   }
   
+  // Filter out any paragraphs with 0 characters
+  const filteredParagraphs = paragraphs.filter(paragraph => {
+    const paragraphText = paragraph.map(word => word.text).join('').replace(/\n/g, '').trim();
+    return paragraphText.length > 0;
+  });
+  
   // If we ended up with no paragraphs or just one very large paragraph,
   // split the content into reasonable chunks
-  if (paragraphs.length === 0 || (paragraphs.length === 1 && words.length > 100)) {
+  if (filteredParagraphs.length === 0 || (filteredParagraphs.length === 1 && words.length > 100)) {
     // Clear existing paragraphs to avoid duplication
-    paragraphs.length = 0;
+    filteredParagraphs.length = 0;
     
     // Split into chunks of approximately 100-150 words
     const chunkSize = 150;
     for (let i = 0; i < words.length; i += chunkSize) {
-      paragraphs.push(words.slice(i, i + chunkSize));
+      const chunk = words.slice(i, i + chunkSize);
+      // Only add chunk if it has content
+      if (chunk.some(word => word.text.trim().length > 0)) {
+        filteredParagraphs.push(chunk);
+      }
     }
   }
   
-  return paragraphs;
+  // Ensure every paragraph has at least one blank word
+  for (let i = 0; i < filteredParagraphs.length; i++) {
+    ensureParagraphHasBlank(filteredParagraphs[i]);
+  }
+  
+  return filteredParagraphs;
+}
+
+// Helper function to ensure a paragraph has at least one blank word
+function ensureParagraphHasBlank(paragraph: Word[]): void {
+  // Check if paragraph already has at least one blank word
+  const hasBlank = paragraph.some(word => word.isBlank === true);
+  
+  if (!hasBlank) {
+    // Find a suitable word to blank out
+    const candidates = paragraph.filter(word => {
+      // Exclude newlines, punctuation, and very short words
+      return (
+        word.text !== '\n' && 
+        !/^[.,;:!?()'"]+$/.test(word.text) && 
+        word.text.length > 3
+      );
+    });
+    
+    if (candidates.length > 0) {
+      // Choose a word from the middle portion of the paragraph
+      const middleIndex = Math.floor(candidates.length / 2);
+      // Add some randomness to avoid always picking same position
+      const selectedIndex = Math.max(0, Math.min(candidates.length - 1, 
+        middleIndex + Math.floor(Math.random() * 3) - 1));
+        
+      // Make the selected word blank
+      candidates[selectedIndex].isBlank = true;
+      // Keep original word for reference
+      candidates[selectedIndex].originalWord = candidates[selectedIndex].text;
+    }
+  }
 }
 
 // Helper to extract original text from words
