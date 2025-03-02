@@ -1,18 +1,26 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { Message } from '../types';
 
-interface Message {
-  role: 'user' | 'assistant';
-  content: string;
+interface ChatProps {
+  context?: string;
 }
 
-export default function Chat() {
+export default function Chat({ context }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([
     { role: 'assistant', content: 'Hi there! I can help you better understand what you\'re reading. Ask me anything about the text or concepts you\'re not sure about.' }
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to bottom of messages
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [messages]);
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,21 +32,37 @@ export default function Chat() {
     setInput('');
     setLoading(true);
     
-    // Simulate response delay
-    setTimeout(() => {
-      const mockResponses = [
-        "That's an interesting question about the text. Based on the content, I'd say the main idea revolves around how people interpret information differently based on their prior knowledge.",
-        "Good question! The text is exploring the relationship between theory and practice in this domain. It suggests that practical applications often reveal gaps in theoretical models.",
-        "I understand your confusion. This paragraph is describing a complex process, but essentially it means that learning happens in stages, with each new piece of information building on previous understanding.",
-        "That's a great observation! The author is indeed making a comparison between different approaches to problem-solving. The first approach emphasizes analysis while the second focuses more on intuition."
-      ];
+    try {
+      // Call the chat API
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMessage],
+          context
+        }),
+      });
       
-      const randomResponse = mockResponses[Math.floor(Math.random() * mockResponses.length)];
-      const botMessage: Message = { role: 'assistant', content: randomResponse };
+      if (!response.ok) {
+        throw new Error('Failed to get response from chat API');
+      }
       
-      setMessages(prevMessages => [...prevMessages, botMessage]);
+      const data = await response.json();
+      setMessages(prevMessages => [...prevMessages, data.message]);
+    } catch (error) {
+      console.error('Error in chat:', error);
+      setMessages(prevMessages => [
+        ...prevMessages, 
+        { 
+          role: 'assistant', 
+          content: 'Sorry, I encountered an error processing your request. Please try again.' 
+        }
+      ]);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -63,6 +87,7 @@ export default function Chat() {
             </div>
           </div>
         )}
+        <div ref={messagesEndRef} />
       </div>
       
       <form onSubmit={handleSendMessage} className="flex gap-2">
@@ -72,10 +97,11 @@ export default function Chat() {
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask a question about the text..."
           className="flex-grow p-2 border rounded-md"
+          disabled={loading}
         />
         <button 
           type="submit"
-          disabled={loading}
+          disabled={loading || !input.trim()}
           className="p-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">

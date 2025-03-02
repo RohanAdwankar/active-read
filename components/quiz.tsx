@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-
-interface Question {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-}
+import { Question } from '../types';
 
 interface QuizProps {
   text: string;
@@ -21,46 +16,41 @@ export default function Quiz({ text }: QuizProps) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simulating quiz generation based on the text
-    const generateQuiz = () => {
-      setTimeout(() => {
-        // Mock questions based on the text
-        const mockQuestions: Question[] = [
+    // Fetch quiz questions from the API
+    const generateQuiz = async () => {
+      try {
+        const response = await fetch('/api/generate-quiz', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to generate quiz questions');
+        }
+        
+        const data = await response.json();
+        setQuestions(data.questions);
+      } catch (error) {
+        console.error('Error generating quiz:', error);
+        // Fallback to default questions if the API fails
+        setQuestions([
           {
-            question: "Based on the paragraph, what would be the most likely conclusion?",
+            question: "Based on the passage, what can be inferred?",
             options: [
-              "The topic is widely understood",
-              "There are competing perspectives on this topic",
-              "More research is needed",
-              "The evidence is inconclusive"
+              "Option A",
+              "Option B",
+              "Option C",
+              "Option D"
             ],
             correctAnswer: 1
-          },
-          {
-            question: "Which of these statements best represents the main idea?",
-            options: [
-              "A comprehensive explanation of the concept",
-              "A historical overview of the subject",
-              "A comparison of different approaches",
-              "An argument for a specific position"
-            ],
-            correctAnswer: 3
-          },
-          {
-            question: "What can be inferred from the paragraph?",
-            options: [
-              "The author supports traditional viewpoints",
-              "The author is challenging conventional wisdom",
-              "The author is presenting a balanced perspective",
-              "The author is introducing a new concept"
-            ],
-            correctAnswer: 2
           }
-        ];
-        
-        setQuestions(mockQuestions);
+        ]);
+      } finally {
         setLoading(false);
-      }, 1500); // Simulate loading time
+      }
     };
 
     if (text) {
@@ -97,6 +87,14 @@ export default function Quiz({ text }: QuizProps) {
       <div className="flex flex-col items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         <p className="mt-4 text-gray-600">Generating quiz questions...</p>
+      </div>
+    );
+  }
+  
+  if (questions.length === 0) {
+    return (
+      <div className="text-center p-4">
+        <p className="text-gray-700">Unable to generate quiz questions for this text.</p>
       </div>
     );
   }

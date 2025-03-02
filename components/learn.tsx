@@ -4,6 +4,7 @@ import { useState } from 'react';
 import TextProcessor from './text-processor';
 import Quiz from './quiz';
 import Chat from './chat';
+import Summary from './summary';
 
 interface Word {
   id: number;
@@ -21,6 +22,7 @@ export default function Learn({ processedText, onBack }: LearnProps) {
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeParagraph, setActiveParagraph] = useState<number | null>(null);
   const [score, setScore] = useState<{correct: number, total: number} | null>(null);
+  const [showSummary, setShowSummary] = useState(false);
 
   // Group words into paragraphs
   const paragraphs = groupIntoParagraphs(processedText);
@@ -28,11 +30,21 @@ export default function Learn({ processedText, onBack }: LearnProps) {
   const handleQuizActivate = (paragraphIndex: number) => {
     setActiveParagraph(paragraphIndex);
     setShowQuiz(true);
+    setShowSummary(false);
+  };
+  
+  const handleSummaryActivate = (paragraphIndex: number) => {
+    setActiveParagraph(paragraphIndex);
+    setShowSummary(true);
+    setShowQuiz(false);
   };
   
   const handleComplete = (correct: number, total: number) => {
     setScore({ correct, total });
   };
+
+  // Get the full text content for context
+  const fullText = processedText.map(word => word.originalWord || word.text).join('');
 
   return (
     <div className="flex flex-col md:flex-row gap-4">
@@ -68,26 +80,15 @@ export default function Learn({ processedText, onBack }: LearnProps) {
                 Quiz on this paragraph
               </button>
               <button
-                onClick={() => setActiveParagraph(index)}
+                onClick={() => handleSummaryActivate(index)}
                 className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
               >
                 Summarize this paragraph
               </button>
             </div>
             
-            {activeParagraph === index && !showQuiz && (
-              <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
-                <h3 className="font-semibold text-lg mb-2">Summarize this paragraph</h3>
-                <textarea 
-                  className="w-full p-3 border rounded-md min-h-[100px] resize-y"
-                  placeholder="Write your summary here..."
-                ></textarea>
-                <div className="mt-3 flex justify-end">
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                    Save Summary
-                  </button>
-                </div>
-              </div>
+            {activeParagraph === index && showSummary && (
+              <Summary paragraph={paragraph} />
             )}
           </div>
         ))}
@@ -127,7 +128,7 @@ export default function Learn({ processedText, onBack }: LearnProps) {
         {showQuiz ? (
           <Quiz text={getOriginalText(paragraphs[activeParagraph || 0])} />
         ) : (
-          <Chat />
+          <Chat context={fullText} />
         )}
         
         {!showQuiz && (
