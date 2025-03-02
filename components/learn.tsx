@@ -39,6 +39,7 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
   
   const handleComplete = (correct: number, total: number) => {
     setScore({ correct, total });
+
   };
 
   // Get the full text content for context
@@ -81,6 +82,7 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
                 processedText={paragraph} 
                 onComplete={handleComplete}
                 isParagraph={true}
+                isFirst={index === 0}
               />
               
               <div className="mt-4 flex gap-3">

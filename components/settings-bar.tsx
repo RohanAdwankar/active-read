@@ -5,13 +5,14 @@ import { useState, useRef, useEffect } from 'react';
 export interface Settings {
   blankFrequency: number;  // percentage of candidate words to remove (5-30%)
   onlyImportantWords: boolean;  // toggle to control whether to filter out common/short words
+  dyslexicFont: boolean;  // toggle to control whether to use the OpenDyslexic font
 }
 
 interface SettingsBarProps {
   settings: Settings;
   onSettingsChange: (settings: Settings) => void;
   visible?: boolean;
-  disabled?: boolean; // New prop to disable settings when in learn mode
+  disabled?: boolean; 
 }
 
 export default function SettingsBar({ settings, onSettingsChange, visible = true, disabled = false }: SettingsBarProps) {
@@ -31,6 +32,14 @@ export default function SettingsBar({ settings, onSettingsChange, visible = true
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (settings?.dyslexicFont) {
+      document.body.classList.add("dyslexic-font");
+    } else {
+      document.body.classList.remove("dyslexic-font");
+    }
+  }, [settings?.dyslexicFont]);
   
   if (!visible) return null;
   
@@ -39,11 +48,9 @@ export default function SettingsBar({ settings, onSettingsChange, visible = true
       {/* Gear icon button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed top-6 right-6 z-10 bg-white p-3 rounded-full shadow-md ${
-          disabled ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-50'
-        }`}
+        className={`fixed top-6 right-6 z-10 bg-white p-3 rounded-full shadow-md hover:bg-gray-50'}`}
         aria-label="Settings"
-        disabled={disabled}
+        // disabled={disabled}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
           <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
@@ -98,7 +105,9 @@ export default function SettingsBar({ settings, onSettingsChange, visible = true
           
           <div className={`flex items-center justify-between mb-3 ${disabled ? 'opacity-50 pointer-events-none' : ''}`}>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Only Blank Out Important Words</label>
+              <label className="block text-sm font-medium text-gray-700" htmlFor="toggle-important">
+                Only Blank Out Important Words
+              </label>
               <p className="text-xs text-gray-500">
                 When enabled, only longer, non-common words will be removed
               </p>
@@ -114,11 +123,11 @@ export default function SettingsBar({ settings, onSettingsChange, visible = true
                   });
                 }}
                 disabled={disabled}
-                id="toggle"
+                id="toggle-important" // ✅ Unique ID
                 className="sr-only"
               />
               <label 
-                htmlFor="toggle" 
+                htmlFor="toggle-important" // ✅ Match the correct input
                 className={`block overflow-hidden h-6 rounded-full cursor-pointer ${
                   settings.onlyImportantWords ? 'bg-blue-500' : 'bg-gray-300'
                 }`}
@@ -131,12 +140,51 @@ export default function SettingsBar({ settings, onSettingsChange, visible = true
               </label>
             </div>
           </div>
+
+          <div className={`flex items-center justify-between mb-3`}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700" htmlFor="toggle-dyslexic">
+                Enable Dyslexic Font
+              </label>
+              <p className="text-xs text-gray-500">
+                Use the OpenDyslexic font for better readability
+              </p>
+            </div>
+            <div className="relative inline-block w-12 align-middle select-none">
+              <input 
+                type="checkbox"
+                checked={settings.dyslexicFont}
+                onChange={(e) => {
+                  onSettingsChange({
+                    ...settings,
+                    dyslexicFont: e.target.checked
+                  });
+                }}
+                // disabled={disabled}
+                id="toggle-dyslexic" // ✅ Unique ID
+                className="sr-only"
+              />
+              <label 
+                htmlFor="toggle-dyslexic" // ✅ Match the correct input
+                className={`block overflow-hidden h-6 rounded-full cursor-pointer ${
+                  settings.dyslexicFont ? 'bg-blue-500' : 'bg-gray-300'
+                }`}
+              >
+                <span 
+                  className={`block h-6 w-6 rounded-full bg-white shadow transform transition-transform ${
+                    settings.dyslexicFont ? 'translate-x-6' : 'translate-x-0'
+                  }`} 
+                />
+              </label>
+            </div>
+          </div>
+
           
-          {disabled && (
+          {/* {disabled && (
             <div className="text-xs text-amber-600 mt-2">
               Settings cannot be changed during the exercise
             </div>
-          )}
+          )} */}
         </div>
       )}
     </div>

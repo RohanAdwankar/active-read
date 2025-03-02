@@ -20,7 +20,8 @@ export default function Reader() {
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<Settings>({
     blankFrequency: 15, // default 15%
-    onlyImportantWords: true // default to only removing important words
+    onlyImportantWords: true, // default to only removing important words
+    dyslexicFont: true
   });
   const [title, setTitle] = useState<string>("Active Reader");
 
