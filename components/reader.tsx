@@ -52,7 +52,6 @@ export default function Reader() {
             <div className="flex-1">
               <div className="bg-white p-6 rounded-lg shadow-md h-full">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <span className="text-3xl mr-2">📝</span>
                   Copy & Paste Text
                 </h2>
                 <TextInput onTextSubmit={handleTextSubmit} compact={true} />
@@ -62,7 +61,6 @@ export default function Reader() {
             <div className="flex-1">
               <div className="bg-white p-6 rounded-lg shadow-md h-full">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <span className="text-3xl mr-2">📄</span>
                   Upload a File
                 </h2>
                 <FileInput onTextSubmit={handleTextSubmit} compact={true} />
@@ -72,7 +70,6 @@ export default function Reader() {
             <div className="flex-1">
               <div className="bg-white p-6 rounded-lg shadow-md h-full">
                 <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  <span className="text-3xl mr-2">🔗</span>
                   From URL
                 </h2>
                 <UrlInput onTextSubmit={handleTextSubmit} compact={true} />
