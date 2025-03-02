@@ -6,7 +6,7 @@ export default function Home() {
       <header className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Active Reading Exercise</h1>
         <p className="text-gray-600 mt-2">
-          Paste your text, and we'll create a fill-in-the-blanks exercise to test your comprehension
+          Create a fill-in-the-blanks exercise using one of the methods below
         </p>
       </header>
       <Reader />
