@@ -168,10 +168,7 @@ function groupIntoParagraphs(words: Word[]): Word[][] {
     currentParagraph.push(word);
     
     // If word has a newline or period followed by space, end paragraph
-    if (word.text === '\n' || 
-        (word.text === '.' && 
-         words[words.indexOf(word) + 1]?.text === ' ' && 
-         words[words.indexOf(word) + 2]?.text?.match(/[A-Z]/))) {
+    if (word.text === '\n') {
       if (currentParagraph.length > 10) { // Ensure paragraph has reasonable length
         paragraphs.push([...currentParagraph]);
         currentParagraph = [];
