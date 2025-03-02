@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 interface Word {
   id: number;
@@ -12,9 +12,10 @@ interface Word {
 interface TextProcessorProps {
   processedText: Word[];
   onComplete: (score: number, total: number) => void;
+  isParagraph?: boolean;
 }
 
-export default function TextProcessor({ processedText, onComplete }: TextProcessorProps) {
+export default function TextProcessor({ processedText, onComplete, isParagraph = false }: TextProcessorProps) {
   const [words, setWords] = useState<Word[]>(processedText);
   const [submitted, setSubmitted] = useState(false);
 
@@ -35,9 +36,9 @@ export default function TextProcessor({ processedText, onComplete }: TextProcess
   };
 
   return (
-    <div className="w-full max-w-3xl mx-auto my-8">
-      <div className="bg-white p-6 rounded-lg shadow">
-        <div className="text-lg leading-relaxed mb-8">
+    <div className={isParagraph ? "" : "w-full max-w-3xl mx-auto my-8"}>
+      <div className={`bg-white p-6 rounded-lg ${!isParagraph ? 'shadow' : ''}`}>
+        <div className="text-lg leading-relaxed mb-4">
           {words.map((word) => (
             <span key={word.id} className="mr-1">
               {word.isBlank ? (
@@ -53,6 +54,7 @@ export default function TextProcessor({ processedText, onComplete }: TextProcess
                           : 'border-red-500 bg-red-100'
                         : 'border-gray-400'}`}
                     disabled={submitted}
+                    size={Math.max(5, word.originalWord?.length || 0)}
                   />
                   {submitted && word.text.toLowerCase() !== word.originalWord?.toLowerCase() && (
                     <span className="text-xs text-red-600 block">{word.originalWord}</span>
@@ -73,12 +75,13 @@ export default function TextProcessor({ processedText, onComplete }: TextProcess
             Check Answers
           </button>
         ) : (
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700"
-          >
-            Try Another Text
-          </button>
+          <div className="text-green-700 font-medium">
+            {words.filter(word => word.isBlank).every(
+              word => word.text.toLowerCase() === word.originalWord?.toLowerCase()
+            ) 
+              ? "All correct! Great job!"
+              : "Review your answers above."}
+          </div>
         )}
       </div>
     </div>

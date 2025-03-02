@@ -4,7 +4,7 @@ import { useState } from 'react';
 import TextInput from './text-input';
 import FileInput from './file-input';
 import UrlInput from './url-input';
-import TextProcessor from './text-processor';
+import Learn from './learn';
 
 interface Word {
   id: number;
@@ -16,7 +16,6 @@ interface Word {
 export default function Reader() {
   const [processedText, setProcessedText] = useState<Word[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [score, setScore] = useState<{correct: number, total: number} | null>(null);
   
   const handleTextSubmit = async (text: string) => {
     setLoading(true);
@@ -41,13 +40,8 @@ export default function Reader() {
     }
   };
 
-  const handleComplete = (correct: number, total: number) => {
-    setScore({ correct, total });
-  };
-
   const handleReset = () => {
     setProcessedText(null);
-    setScore(null);
   };
 
   return (
@@ -95,35 +89,10 @@ export default function Reader() {
       )}
       
       {processedText && !loading && (
-        <>
-          <div className="flex justify-center mb-4">
-            <button 
-              onClick={handleReset} 
-              className="text-blue-600 hover:text-blue-800 flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z" clipRule="evenodd" />
-              </svg>
-              Back to input options
-            </button>
-          </div>
-          
-          <TextProcessor 
-            processedText={processedText} 
-            onComplete={handleComplete}
-          />
-          
-          {score && (
-            <div className="w-full max-w-3xl mx-auto my-4 p-4 bg-blue-100 rounded-lg text-center">
-              <h3 className="text-xl font-bold">Your Score: {score.correct} / {score.total}</h3>
-              <p className="text-gray-700">
-                {score.correct === score.total 
-                  ? "Perfect! You got all the words right."
-                  : `You got ${score.correct} out of ${score.total} words correct.`}
-              </p>
-            </div>
-          )}
-        </>
+        <Learn 
+          processedText={processedText}
+          onBack={handleReset}
+        />
       )}
     </div>
   );
