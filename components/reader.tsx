@@ -47,32 +47,40 @@ export default function Reader() {
   return (
     <div className="container mx-auto px-4">
       {!processedText && !loading && (
-        <div className="max-w-5xl mx-auto">
-          <div className="flex flex-col md:flex-row gap-8">
-            <div className="flex-1">
-              <div className="bg-white p-6 rounded-lg shadow-md h-full">
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  Copy & Paste Text
-                </h2>
-                <TextInput onTextSubmit={handleTextSubmit} compact={true} />
+        <div>
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold mb-4">Reader</h1>
+            <p className="text-gray-600">Improve your reading comprehension with interactive exercises.</p>
+            <p className="text-gray-600">Paste text, upload a file, or enter a URL to get started.</p>
+          </div>
+
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row gap-8">
+              <div className="flex-1">
+                <div className="bg-white p-6 rounded-lg shadow-md h-full">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center">
+                    Copy & Paste Text
+                  </h2>
+                  <TextInput onTextSubmit={handleTextSubmit} compact={true} />
+                </div>
               </div>
-            </div>
-            
-            <div className="flex-1">
-              <div className="bg-white p-6 rounded-lg shadow-md h-full">
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  Upload a File
-                </h2>
-                <FileInput onTextSubmit={handleTextSubmit} compact={true} />
+              
+              <div className="flex-1">
+                <div className="bg-white p-6 rounded-lg shadow-md h-full">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center">
+                    Upload a File
+                  </h2>
+                  <FileInput onTextSubmit={handleTextSubmit} compact={true} />
+                </div>
               </div>
-            </div>
-            
-            <div className="flex-1">
-              <div className="bg-white p-6 rounded-lg shadow-md h-full">
-                <h2 className="text-xl font-semibold mb-4 flex items-center">
-                  From URL
-                </h2>
-                <UrlInput onTextSubmit={handleTextSubmit} compact={true} />
+              
+              <div className="flex-1">
+                <div className="bg-white p-6 rounded-lg shadow-md h-full">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center">
+                    From URL
+                  </h2>
+                  <UrlInput onTextSubmit={handleTextSubmit} compact={true} />
+                </div>
               </div>
             </div>
           </div>
