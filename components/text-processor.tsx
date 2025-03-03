@@ -35,6 +35,22 @@ export default function TextProcessor({
   // Track correct answers for score calculation
   const [correctCount, setCorrectCount] = useState(0);
 
+  // Add a counter to track how many blanks there are and how many have been filled
+  const totalBlanks = processedText.filter(word => word.isBlank).length;
+  const [filledBlanks, setFilledBlanks] = useState(0);
+  const hasCalledComplete = useRef(false);
+
+  // Check if paragraph is complete whenever filledBlanks changes
+  useEffect(() => {
+    if (filledBlanks >= totalBlanks && !hasCalledComplete.current && totalBlanks > 0) {
+      console.log(`All ${filledBlanks}/${totalBlanks} blanks filled in paragraph ${paragraphIndex}`);
+      hasCalledComplete.current = true;
+      
+      // Explicitly call the onComplete function with the correct paragraph index
+      onComplete(correctCount, totalBlanks, paragraphIndex);
+    }
+  }, [filledBlanks, totalBlanks, correctCount, paragraphIndex, onComplete]);
+
   // Check if paragraph is too short (less than 5 words)
   if (processedText.length < 5) {
     return null; // Don't render this paragraph
@@ -100,8 +116,8 @@ export default function TextProcessor({
             return newState;
           });
           
-          // Check if all words are now filled
-          checkCompletionStatus();
+          // Increment filled count
+          setFilledBlanks(prev => prev + 1);
         }, 500);
       }, 500);
     } else if (value && value.trim() !== '' && isCorrect) {
@@ -115,24 +131,8 @@ export default function TextProcessor({
       // Increment correct count
       setCorrectCount(prev => prev + 1);
       
-      // Update filled count
-      setFilledCount(prev => prev + 1);
-      
-      // Check if all words are now filled
-      checkCompletionStatus();
-    }
-  };
-  
-  // Update the checkCompletionStatus function to pass the paragraph index
-  const checkCompletionStatus = () => {
-    const blanks = words.filter(word => word.isBlank);
-    const filledBlanks = blanks.filter(word => word.submitted || revealing[word.id]);
-    
-    if (filledBlanks.length === blanks.length && !completed) {
-      setCompleted(true);
-      console.log(`Completing paragraph ${paragraphIndex} with score ${correctCount}/${blanks.length}`);
-      // Pass the paragraph index to identify which paragraph was completed
-      onComplete(correctCount, blanks.length, paragraphIndex);
+      // Update filled blanks count
+      setFilledBlanks(prev => prev + 1);
     }
   };
 
@@ -148,6 +148,8 @@ export default function TextProcessor({
     const currentWord = words.find(word => word.id === id);
     if (!currentWord || !currentWord.text || currentWord.text.trim() === '') return;
     
+    console.log(`Submitting word ${id} with value "${currentWord.text}"`);
+    
     // Process this word
     processWord(id, currentWord.text);
     
@@ -161,6 +163,8 @@ export default function TextProcessor({
       if (nextInput) {
         (nextInput as HTMLInputElement).focus();
       }
+    } else {
+      console.log(`No more blank words after word ${id}`);
     }
   };
 

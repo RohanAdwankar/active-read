@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import TextProcessor from './text-processor';
 import Quiz from './quiz';
 import Chat from './chat';
@@ -22,9 +22,17 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
   const [showSummary, setShowSummary] = useState(false);
   const [completedParagraphs, setCompletedParagraphs] = useState<{[key: number]: boolean}>({});
   const [score, setScore] = useState<{correct: number, total: number} | null>(null);
+  
+  // Add a direct tracking state for showing paragraph actions
+  const [showParagraphActions, setShowParagraphActions] = useState<boolean[]>([]);
 
   // Group words into paragraphs
   const paragraphs = groupIntoParagraphs(processedText);
+  
+  // Initialize the paragraph actions visibility array
+  useEffect(() => {
+    setShowParagraphActions(Array(paragraphs.length).fill(false));
+  }, [paragraphs.length]);
   
   const handleQuizActivate = (paragraphIndex: number) => {
     setActiveParagraph(paragraphIndex);
@@ -38,20 +46,34 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
     setShowQuiz(false);
   };
   
-  // Update the handleComplete function to track which paragraphs are completed
+  // Simplify the handleComplete function to be more robust
   const handleComplete = (correct: number, total: number, paragraphIndex: number) => {
-    console.log("Paragraph completed:", paragraphIndex, "Score:", correct, "/", total);
+    console.log(`[handleComplete] Paragraph ${paragraphIndex} completed with score ${correct}/${total}`);
     
-    // Mark this paragraph as completed
-    setCompletedParagraphs(prevState => {
-      return { 
-        ...prevState, 
-        [paragraphIndex]: true 
-      };
+    // Update both state variables at once
+    setCompletedParagraphs(prev => {
+      const updated = {...prev};
+      updated[paragraphIndex] = true;
+      return updated;
     });
-
+    
+    setShowParagraphActions(prev => {
+      const updated = [...prev];
+      updated[paragraphIndex] = true;
+      return updated;
+    });
+    
     setScore({ correct, total });
   };
+
+  // Log when completedParagraphs or showParagraphActions change
+  useEffect(() => {
+    console.log("completedParagraphs updated:", completedParagraphs);
+  }, [completedParagraphs]);
+  
+  useEffect(() => {
+    console.log("showParagraphActions updated:", showParagraphActions);
+  }, [showParagraphActions]);
 
   // Get the full text content for context
   const fullText = processedText.map(word => word.originalWord || word.text).join('');
@@ -82,24 +104,27 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
                     
           {paragraphs.map((paragraph, index) => (
             <div key={index} className="mb-10">
+              
               <TextProcessor 
                 processedText={paragraph} 
-                onComplete={(correct, total) => handleComplete(correct, total, index)}
+                onComplete={(correct, total, pIndex) => {
+                  console.log(`[TextProcessor callback] onComplete(${correct}, ${total}, ${pIndex})`);
+                  handleComplete(correct, total, pIndex);
+                }}
                 isParagraph={true}
                 isFirst={index === 0}
                 darkMode={settings?.darkMode}
                 paragraphIndex={index} // Pass the paragraph index
               />
               
-              {/* Only show buttons after paragraph is completed */}
-              {completedParagraphs[index] || true && (
+              {/* Use conditional rendering instead of CSS visibility */}
+              {!!completedParagraphs[index] && (
                 <div 
-                  className="mt-6 flex gap-3 transition-all animate-fadeIn" 
                   id={`paragraph-actions-${index}`}
+                  className="mt-6 flex gap-3 transition-all animate-fadeIn"
                 >
                   <button
                     onClick={() => handleQuizActivate(index)}
-                    ref={completedParagraphs[index] && !activeParagraph ? (el) => el?.focus() : null}
                     className={`px-4 py-2 rounded-md text-white ${
                       settings?.darkMode 
                         ? 'bg-purple-600 hover:bg-purple-500' 
