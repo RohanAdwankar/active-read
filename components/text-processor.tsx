@@ -131,8 +131,8 @@ export default function TextProcessor({
                       }`}
                     disabled={word.submitted}
                     style={{
-                      width: `${Math.max(4, word.originalWord?.length || 0) * 10}px`,
-                      minWidth: '60px'
+                      width: `${Math.max(10, word.originalWord?.length || 0) * 15}px`,
+                      minWidth: '100px'
                     }}
                   />
                   {word.submitted && word.text.toLowerCase() !== word.originalWord?.toLowerCase() && (

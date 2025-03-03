@@ -13,7 +13,7 @@ const llm = new ChatGroq({
 });
 
 const QuizQuestion = z.object({
-  question: z.string().describe("Ask a question about paragraph. Make the question short and fairly trivially easy."),
+  question: z.string().describe("Ask a question about paragraph. Make the question short and medium difficulty, requiring that the user read the text in entirity."),
   options: z.array(z.string()).length(4).describe("Four options to choose from. Make them all plausible, maybe words from the text? Whatever you want. Add one silly option."),
   correctAnswer: z.number().int().min(0).max(3).describe("Index of the correct answer in the options array."),
 })
@@ -29,7 +29,7 @@ async function generateQuizQuestion(paragraph: string) {
     {
       role: "system",
       content:
-        "You are a helpful assistant that generates quiz questions. Generate a questions from the paragraph. Make it easy and trivial.",
+        "You are a helpful assistant that generates quiz questions. Generate a questions from the paragraph. Make it moderate difficulty and requiring contextual reasoning from the provided text.",
     },
     { role: "user", content: paragraph },
   ]);
