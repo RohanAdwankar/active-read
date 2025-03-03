@@ -59,11 +59,12 @@ export default function Chat({ context, darkMode = false }: ChatProps) {
       }
       
       const data = await response.json();
+      console.log(data);
       
       const assistantMessage: Message = {
         id: Date.now() + 1,
         type: 'assistant',
-        content: data.reply
+        content: data.message.content
       };
       
       setMessages(prev => [...prev, assistantMessage]);

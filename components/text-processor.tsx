@@ -212,7 +212,7 @@ export default function TextProcessor({
                   ) : (
                     <input
                       type="text"
-                      value={word.text || ''}
+                      value={''}
                       onChange={(e) => handleInputChange(word.id, e.target.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' || e.key === 'Tab') {
