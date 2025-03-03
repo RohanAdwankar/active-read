@@ -32,8 +32,9 @@ export interface Message {
 }
 
 export interface ChatRequest {
-  messages: Message[];
-  context?: string; // The text being studied
+  message: Message;
+  context: string; // The text being studied
+  history: Message[]; // The chat history
 }
 
 export interface ChatResponse {

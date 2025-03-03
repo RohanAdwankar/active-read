@@ -1,6 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { QuizRequest, QuizResponse, Question } from '../../../types';
 
+import { ChatGroq } from "@langchain/groq";
+import { env } from 'process';
+import { z } from 'zod';
+
+const llm = new ChatGroq({
+  apiKey: env.GROQ_API_KEY,
+  model: 'llama-3.3-70b-versatile',
+  temperature: 0.5,
+  maxTokens: 150,
+});
+
+const QuizQuestion = z.object({
+  question: z.string().describe("Ask a question about paragraph. Make the question short and fairly trivially easy."),
+  options: z.array(z.string()).length(4).describe("Four options to choose from. Make them all plausible, maybe words from the text? Whatever you want. Add one silly option."),
+  correctAnswer: z.number().int().min(0).max(3).describe("Index of the correct answer in the options array."),
+})
+
+// const Quiz = z.object({
+//   questions: z.array(QuizQuestion).describe("Array of quiz questions generated from the text."),
+// })
+
+const structured_llm = llm.withStructuredOutput(QuizQuestion);
+
+async function generateQuizQuestion(paragraph: string) {
+  const aiMsg = await structured_llm.invoke([
+    {
+      role: "system",
+      content:
+        "You are a helpful assistant that generates quiz questions. Generate a questions from the paragraph. Make it easy and trivial.",
+    },
+    { role: "user", content: paragraph },
+  ]);
+  return aiMsg
+}
+
 export async function POST(req: NextRequest) {
   try {
     const { text } = await req.json() as QuizRequest;
@@ -12,13 +47,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // In a real implementation:
-    // 1. Embed the text using an embedding model
-    // 2. Store in vector DB or use directly
-    // 3. Generate quiz questions using LLM with the context
-    
-    // Placeholder: Generate mock questions based on text length
-    const questions = generateMockQuestions(text);
+    const question = await generateQuizQuestion(text);
+    const questions = [question]
     
     return NextResponse.json({ questions } as QuizResponse);
   } catch (error) {
@@ -28,60 +58,4 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function generateMockQuestions(text: string): Question[] {
-  // Generate different questions based on the text to simulate dynamic content
-  // In reality, we'd use the text content to inform the questions
-  const textLength = text.length;
-  const wordCount = text.split(/\s+/).length;
-  
-  const questionTemplates: Question[] = [
-    {
-      question: `Based on the paragraph with approximately ${wordCount} words, what would be the most likely conclusion?`,
-      options: [
-        "The topic is widely understood",
-        "There are competing perspectives on this topic",
-        "More research is needed",
-        "The evidence is inconclusive"
-      ],
-      correctAnswer: 1
-    },
-    {
-      question: "Which of these statements best represents the main idea?",
-      options: [
-        "A comprehensive explanation of the concept",
-        "A historical overview of the subject",
-        "A comparison of different approaches",
-        "An argument for a specific position"
-      ],
-      correctAnswer: 3
-    },
-    {
-      question: "What can be inferred from the paragraph?",
-      options: [
-        "The author supports traditional viewpoints",
-        "The author is challenging conventional wisdom",
-        "The author is presenting a balanced perspective",
-        "The author is introducing a new concept"
-      ],
-      correctAnswer: 2
-    }
-  ];
-  
-  // Add additional dynamic question based on text characteristics
-  if (textLength > 500) {
-    questionTemplates.push({
-      question: "What would be the best title for this longer paragraph?",
-      options: [
-        "Understanding Complex Systems",
-        "Historical Perspectives on the Topic",
-        "A New Approach to Problem Solving",
-        "Comparing Theoretical Models"
-      ],
-      correctAnswer: 0
-    });
-  }
-  
-  return questionTemplates;
 }

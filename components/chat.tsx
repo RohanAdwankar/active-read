@@ -48,7 +48,7 @@ export default function Chat({ context, darkMode = false }: ChatProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: input,
+          message: {role: "user", content: input},
           context: context,
           history: messages
         }),

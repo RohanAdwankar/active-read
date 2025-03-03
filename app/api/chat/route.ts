@@ -2,11 +2,39 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ChatRequest, ChatResponse, Message } from '../../../types';
 
+
+import { ChatGroq } from "@langchain/groq";
+import { env } from 'process';
+
+const llm = new ChatGroq({
+  apiKey: env.GROQ_API_KEY,
+  model: 'llama-3.3-70b-versatile',
+  temperature: 0.5,
+  maxTokens: 150,
+});
+
+async function askAI(prompt: string, context: string) {
+  const aiMsg = await llm.invoke([
+    {
+      role: "system",
+      content:
+        "You are a helpful assistant that answers questions based on the text. The text will be provided to you below. Answer the question based on the text. If you don't know, say 'I don't know'.",
+    },
+    {
+      role: "system",
+      content: context
+    },
+    { role: "user", content: prompt },
+  ]);
+  return aiMsg.content.toString();
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const { messages, context } = await req.json() as ChatRequest;
-    
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    const { message, context, history } = await req.json() as ChatRequest;
+    console.log(message)
+    console.log(message)
+    if (!message || !message.content || message.content.length === 0) {
       return NextResponse.json(
         { error: 'Invalid or empty messages array' },
         { status: 400 }
@@ -14,14 +42,14 @@ export async function POST(req: NextRequest) {
     }
     
     // Get the last user message
-    const lastUserMessage = messages.filter(msg => msg.role === 'user').pop();
+    // const lastUserMessage = message.filter(msg => msg.role === 'user').pop();
     
-    if (!lastUserMessage) {
-      return NextResponse.json(
-        { error: 'No user message found' },
-        { status: 400 }
-      );
-    }
+    // if (!message) {
+    //   return NextResponse.json(
+    //     { error: 'No user message found' },
+    //     { status: 400 }
+    //   );
+    // }
 
     // In a real implementation:
     // 1. Embed the chat context/history and user query
@@ -29,10 +57,15 @@ export async function POST(req: NextRequest) {
     // 3. Generate response using LLM with the context
     
     // Placeholder: Generate response based on message content
-    const responseMessage = generateMockResponse(lastUserMessage.content, context, messages);
+    // const responseMessage = generateMockResponse(lastUserMessage.content, context, messages);
+    const responseMessage = await askAI(
+      message.content,
+      context
+    );
+    console.log(responseMessage);
     
     return NextResponse.json({ 
-      message: responseMessage 
+      message: {role: "assistant", content: responseMessage} 
     } as ChatResponse);
   } catch (error) {
     console.error('Error in chat API:', error);
