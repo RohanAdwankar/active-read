@@ -181,9 +181,9 @@ export default function Reader() {
         </div>
 
         {/* Conditionally render the video as a popup */}
-        {showVideo && (
+        {showVideo && randomVideo && (
           <div className={`fixed inset-0 flex justify-center items-center z-50 
-            ${settings.darkMode ? 'bg-gray-900 bg-opacity-80' : 'bg-gray-100 bg-opacity-80'}`}>
+            ${settings.darkMode ? 'bg-gray-900 bg-opacity-50' : 'bg-gray-100 bg-opacity-50'}`}>
             <div className={`p-4 rounded-xl shadow-lg max-w-lg w-full h-[80vh] flex flex-col
               ${settings.darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
               <div className="relative flex-1 pb-[56.25%] overflow-hidden mb-4">
