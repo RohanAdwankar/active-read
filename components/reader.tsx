@@ -191,7 +191,6 @@ export default function Reader() {
                   src={randomVideo} // Path to the randomly selected video
                   autoPlay
                   loop
-                  muted
                   className="absolute inset-0 w-full h-full"
                 />
               </div>
