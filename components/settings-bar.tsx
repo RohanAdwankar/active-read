@@ -54,7 +54,7 @@ export default function SettingsBar({ settings, onSettingsChange, visible = true
   if (!visible) return null;
   
   return (
-    <div className="relative">
+    <div className="relative z-100">
       {/* Gear icon button with glass morphism effect */}
       <button 
         onClick={() => setIsOpen(!isOpen)}

@@ -8,6 +8,31 @@ import Learn from './learn';
 import SettingsBar, { Settings } from './settings-bar';
 import LoadingPlaceholder from './loading-placeholder';
 
+  const videoFiles = [
+    '/videos/Snaptik.app_7344378689997606176.mp4',
+    '/videos/Snaptik.app_7429790134733638944.mp4',
+    '/videos/Snaptik.app_7470995966930210081.mp4',
+    '/videos/Snaptik.app_7476200752214445344.mp4',
+    '/videos/Snaptik.app_7405306228034866464.mp4',
+    '/videos/Snaptik.app_7385259884704582945.mp4',
+    '/videos/Snaptik.app_6956579273134050565.mp4',
+    '/videos/Snaptik.app_6941757529101700358.mp4',
+    '/videos/Snaptik.app_7476564407271705887.mp4',
+    '/videos/Snaptik.app_7475187692179868959.mp4',
+    '/videos/Snaptik.app_7473645213232205087.mp4',
+    '/videos/Snaptik.app_7376035875978857760.mp4',
+    '/videos/Snaptik.app_7256306326052162858.mp4',
+    '/videos/Snaptik.app_7432376419998584097.mp4',
+    '/videos/Snaptik.app_7261288061789621546.mp4',
+    '/videos/Snaptik.app_7283898920722369825.mp4',
+    '/videos/Snaptik.app_7131946147945418027.mp4',
+    '/videos/Snaptik.app_7377430487498820897.mp4',
+    '/videos/Snaptik.app_7320412622178880800.mp4',
+    '/videos/Snaptik.app_7474390985477229870.mp4'
+  ];
+
+const randomVideo = videoFiles[Math.floor(Math.random() * videoFiles.length)];
+
 interface Word {
   id: number;
   text: string;
@@ -17,6 +42,22 @@ interface Word {
 }
 
 export default function Reader() {
+
+  const [showVideo, setShowVideo] = useState(false); // State to control video visibility
+  const [randomVideo, setRandomVideo] = useState<string>(''); // State for random video
+
+  useEffect(() => {
+    if (showVideo) {
+      // Select a random video each time the video popup is opened
+      const randomVideo = videoFiles[Math.floor(Math.random() * videoFiles.length)];
+      setRandomVideo(randomVideo);
+    }
+  }, [showVideo]); // Trigger when showVideo state changes
+
+  const toggleVideo = () => {
+    setShowVideo(prev => !prev); // Toggle video visibility
+  };
+
   const [processedText, setProcessedText] = useState<Word[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [settings, setSettings] = useState<Settings>({
@@ -27,6 +68,7 @@ export default function Reader() {
   });
   const [title, setTitle] = useState<string>("Active Reader");
   const [fadeIn, setFadeIn] = useState(false);
+  // const [showVideo, setShowVideo] = useState(false); // State to control video visibility
 
   // Load saved settings from localStorage
   useEffect(() => {
@@ -111,6 +153,10 @@ export default function Reader() {
     setTimeout(() => setFadeIn(true), 100);
   };
 
+  // const toggleVideo = () => {
+  //   setShowVideo(!showVideo); // Toggle video visibility
+  // };
+
   return (
     <div className={`min-h-screen transition-colors duration-500 ${settings.darkMode ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'}`}>
       <div className={`container mx-auto px-4 relative py-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
@@ -120,6 +166,47 @@ export default function Reader() {
           disabled={!!processedText || loading} 
         />
         
+        {/* Add "Watch Video" button */}
+        <div className="fixed top-6 right-20 z-80">
+          <button 
+            onClick={toggleVideo}
+            className={`px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 lucky-button
+              ${settings.darkMode 
+                ? 'bg-gradient-to-r from-pink-600 to-purple-700 hover:shadow-lg hover:shadow-blue-500/25' 
+                : 'bg-gradient-to-r from-pink-500 to-purple-600 hover:shadow-lg hover:shadow-blue-500/25'} 
+              text-white relative overflow-hidden`}
+          >
+            Take a Break!
+          </button>
+        </div>
+
+        {/* Conditionally render the video as a popup */}
+        {showVideo && (
+          <div className={`fixed inset-0 flex justify-center items-center z-50 
+            ${settings.darkMode ? 'bg-gray-900 bg-opacity-80' : 'bg-gray-100 bg-opacity-80'}`}>
+            <div className={`p-4 rounded-xl shadow-lg max-w-lg w-full h-[80vh] flex flex-col
+              ${settings.darkMode ? 'bg-gray-800 text-white' : 'bg-white text-black'}`}>
+              <div className="relative flex-1 pb-[56.25%] overflow-hidden mb-4">
+                <video
+                  src={randomVideo} // Path to the randomly selected video
+                  autoPlay
+                  loop
+                  muted
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+              <button
+                onClick={toggleVideo}
+                className={`self-center mt-4 ${settings.darkMode ? 'text-red-500' : 'text-red-700'} hover:underline`}
+              >
+                Close Video
+              </button>
+            </div>
+          </div>
+        )}
+
+
+        {/* Rest of the component */}
         {!processedText && !loading && (
           <div className="animate-fadeIn">
             <div className="text-center mb-10">
@@ -222,37 +309,4 @@ export default function Reader() {
       </div>
     </div>
   );
-}
-
-// Find the section of code that creates the processedText array and update it
-function processText(text: string, blankFrequency: number): Word[] {
-  // Split text into words while preserving whitespace and punctuation
-  const regex = /(\s+|[,.!?;:]|[^\s,.!?;:]+)/g;
-  const tokens = text.match(regex) || [];
-  
-  let wordIndex = 0;
-  let id = 0;
-  const processedWords: Word[] = [];
-  
-  tokens.forEach((token) => {
-    // Ignore empty tokens
-    if (!token) return;
-    
-    const isWord = /\w+/.test(token);
-    const isBlank = isWord && 
-      Math.random() < (blankFrequency / 100) && 
-      token.length > 3; // Only blank out words longer than 3 chars
-    
-    processedWords.push({
-      id: id++,
-      text: isBlank ? '_'.repeat(token.length) : token,
-      isBlank: isBlank,
-      originalWord: isBlank ? token : undefined,
-      submitted: false
-    });
-    
-    if (isWord) wordIndex++;
-  });
-  
-  return processedWords;
 }
