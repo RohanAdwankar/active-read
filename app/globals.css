@@ -58,6 +58,21 @@ body {
   100% { background-position: 200% 0; }
 }
 
+@keyframes gradientSwirl {
+  0% {
+    background-position: 0% 50%;
+    background-size: 200% 200%;
+  }
+  50% {
+    background-position: 100% 50%;
+    background-size: 200% 200%;
+  }
+  100% {
+    background-position: 0% 50%;
+    background-size: 200% 200%;
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.5s ease forwards;
 }
@@ -73,4 +88,42 @@ body {
     rgba(255,255,255,0) 100%);
   background-size: 200% 100%;
   animation: shimmer 3s infinite;
+}
+
+.animate-gradient-swirl {
+  background-size: 200% 200%;
+  animation: gradientSwirl 3s ease infinite;
+}
+
+.lucky-button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.lucky-button:before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    rgba(59, 130, 246, 0.7) 0%,
+    rgba(79, 70, 229, 0.7) 25%,
+    rgba(99, 102, 241, 0.7) 50%,
+    rgba(79, 70, 229, 0.7) 75%,
+    rgba(59, 130, 246, 0.7) 100%
+  );
+  transition: all 0.5s ease;
+  opacity: 0;
+  z-index: -1;
+  transform: translate(0, 0) rotate(0deg);
+}
+
+.lucky-button:hover:before {
+  opacity: 1;
+  animation: gradientSwirl 3s ease infinite;
+  transform: translate(-25%, -25%) rotate(-15deg);
 }

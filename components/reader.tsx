@@ -189,12 +189,13 @@ export default function Reader() {
               <div className="text-center mt-12">
                 <button 
                   onClick={handleFeelingLucky}
-                  className={`px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105
+                  className={`px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-105 lucky-button
                     ${settings.darkMode 
-                      ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white' 
-                      : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white'}`}
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-700 hover:shadow-lg hover:shadow-blue-500/25' 
+                      : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:shadow-lg hover:shadow-blue-500/25'} 
+                    text-white relative overflow-hidden`}
                 >
-                  <span className="flex items-center">
+                  <span className="relative z-10 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
