@@ -1,5 +1,9 @@
 # Active Reader
+
+https://github.com/user-attachments/assets/538d38cc-ddc1-46ce-a073-0201985bff66
+
 Active Reader is an interactive app that enhances reading comprehension by transforming passive reading into an active learning experience. It automatically creates fill-in-the-blank exercises from any text you provide.
+
 
 ## Features
 * Text Processing: Paste in any text and the application will intelligently blank out words
