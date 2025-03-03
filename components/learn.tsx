@@ -88,13 +88,21 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
               <div className="mt-4 flex gap-3">
                 <button
                   onClick={() => handleQuizActivate(index)}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
+                  className={`px-4 py-2 rounded-md text-white ${
+                    settings?.darkMode 
+                      ? 'bg-purple-600 hover:bg-purple-500' 
+                      : 'bg-purple-600 hover:bg-purple-700'
+                  }`}
                 >
                   Quiz on this paragraph
                 </button>
                 <button
                   onClick={() => handleSummaryActivate(index)}
-                  className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                  className={`px-4 py-2 rounded-md text-white ${
+                    settings?.darkMode 
+                      ? 'bg-green-600 hover:bg-green-500' 
+                      : 'bg-green-600 hover:bg-green-700'
+                  }`}
                 >
                   Summarize this paragraph
                 </button>
@@ -103,16 +111,21 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
               {activeParagraph === index && showSummary && (
                 <Summary 
                   text={getParagraphText(paragraph)} 
-                  onClose={() => setShowSummary(false)} 
+                  onClose={() => setShowSummary(false)}
+                  darkMode={settings?.darkMode} 
                 />
               )}
             </div>
           ))}
           
           {score && (
-            <div className="w-full my-4 p-4 bg-blue-100 rounded-lg">
-              <h3 className="text-xl font-bold">Your Score: {score.correct} / {score.total}</h3>
-              <p className="text-gray-700">
+            <div className={`w-full my-4 p-4 rounded-lg ${
+              settings?.darkMode ? 'bg-blue-900/30 text-gray-100' : 'bg-blue-100 text-gray-800'
+            }`}>
+              <h3 className={`text-xl font-bold ${settings?.darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+                Your Score: {score.correct} / {score.total}
+              </h3>
+              <p className={settings?.darkMode ? 'text-gray-300' : 'text-gray-700'}>
                 {score.correct === score.total 
                   ? "Perfect! You got all the words right."
                   : `You got ${score.correct} out of ${score.total} words correct.`}
@@ -122,18 +135,29 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
         </div>
         
         {/* Sidebar */}
-        <div className={`w-full md:w-80 bg-white p-4 rounded-lg shadow ${showQuiz ? '' : 'opacity-50 pointer-events-none'}`}>
+        <div className={`w-full md:w-80 p-4 rounded-lg shadow fixed right-6 max-w-xs
+          ${settings?.darkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'}`}>
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">Learning Tools</h3>
-            <div className="flex border-b">
+            <h3 className={`text-lg font-semibold mb-2 ${settings?.darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+              Learning Tools
+            </h3>
+            <div className={`flex border-b ${settings?.darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
               <button
-                className={`py-2 px-4 border-b-2 ${showQuiz ? 'border-blue-600 text-blue-600' : 'border-transparent'}`}
+                className={`py-2 px-4 border-b-2 ${
+                  showQuiz 
+                    ? settings?.darkMode ? 'border-blue-500 text-blue-400' : 'border-blue-600 text-blue-600' 
+                    : 'border-transparent'
+                } ${settings?.darkMode ? 'hover:text-blue-300' : 'hover:text-blue-800'}`}
                 onClick={() => setShowQuiz(true)}
               >
                 Quiz
               </button>
               <button
-                className={`py-2 px-4 border-b-2 ${!showQuiz ? 'border-blue-600 text-blue-600' : 'border-transparent'}`}
+                className={`py-2 px-4 border-b-2 ${
+                  !showQuiz 
+                    ? settings?.darkMode ? 'border-blue-500 text-blue-400' : 'border-blue-600 text-blue-600'
+                    : 'border-transparent'
+                } ${settings?.darkMode ? 'hover:text-blue-300' : 'hover:text-blue-800'}`}
                 onClick={() => setShowQuiz(false)}
               >
                 Chat
@@ -142,13 +166,19 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
           </div>
           
           {showQuiz && activeParagraph !== null ? (
-            <Quiz text={getParagraphText(paragraphs[activeParagraph])} />
+            <Quiz 
+              text={getParagraphText(paragraphs[activeParagraph])}
+              darkMode={settings?.darkMode}
+            />
           ) : (
-            <Chat context={fullText} />
+            <Chat 
+              context={fullText}
+              darkMode={settings?.darkMode}
+            />
           )}
           
           {!showQuiz && (
-            <div className="mt-4 text-center text-sm text-gray-500">
+            <div className={`mt-4 text-center text-sm ${settings?.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
               <p>Start a conversation about what you're reading</p>
             </div>
           )}

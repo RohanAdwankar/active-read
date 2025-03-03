@@ -1,17 +1,23 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-
-import {Word} from '../types';
+import { Word } from '../types';
 
 interface TextProcessorProps {
   processedText: Word[];
   onComplete: (score: number, total: number) => void;
   isParagraph?: boolean;
   isFirst?: boolean;
+  darkMode?: boolean;
 }
 
-export default function TextProcessor({ processedText, onComplete, isParagraph = false, isFirst = false }: TextProcessorProps) {
+export default function TextProcessor({ 
+  processedText, 
+  onComplete, 
+  isParagraph = false, 
+  isFirst = false,
+  darkMode = false
+}: TextProcessorProps) {
   const [words, setWords] = useState<Word[]>(processedText);
   const [submitted, setSubmitted] = useState(false);
 
@@ -25,10 +31,16 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
   if (blanksCount === 0) {
     return (
       <div className={isParagraph ? "" : "w-full max-w-3xl mx-auto my-8"}>
-        <div className={`bg-white p-6 rounded-lg ${!isParagraph ? 'shadow' : ''}`}>
+        <div className={`p-6 rounded-lg ${
+          darkMode 
+            ? 'bg-gray-800 text-gray-200' 
+            : 'bg-white text-gray-800'
+        } ${!isParagraph ? 'shadow-md' : ''}`}>
           <div className="text-lg leading-relaxed mb-4">
             {processedText.map((word) => (
-              <span key={word.id}>{word.text}</span>
+              <span key={word.id} className={darkMode ? "text-gray-200" : "text-gray-800"}>
+                {word.text}
+              </span>
             ))}
           </div>
         </div>
@@ -66,10 +78,17 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
 
   return (
     <div className={isParagraph ? "" : "w-full max-w-3xl mx-auto my-8"}>
-      <div className={`bg-white p-6 rounded-lg ${!isParagraph ? 'shadow' : ''}`}>
+      <div className={`p-6 rounded-lg ${
+        darkMode 
+          ? 'bg-gray-800 text-gray-200' 
+          : 'bg-white text-gray-800'
+      } ${!isParagraph ? 'shadow-md' : ''}`}>
         <div className="text-lg leading-relaxed mb-4">
           {words.map((word, index) => (
-            <span key={word.id} className={index > 0 ? "ml-1" : ""}>
+            <span 
+              key={word.id} 
+              className={`${index > 0 ? "ml-1" : ""} ${darkMode ? "text-gray-200" : "text-gray-800"}`}
+            >
               {word.isBlank ? (
                 <span className="inline-block">
                   <input
@@ -103,24 +122,31 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
                       }
                     }}
                     id={`input-${word.id}`}
-                    
-                    className={`w-${Math.max(5, word.originalWord?.length || 0) * 8}px border-b-2 text-left pl-2 mx-1 
-                    ${word.submitted 
-                      ? word.text.toLowerCase() === word.originalWord?.toLowerCase()
-                        ? 'border-green-500 bg-green-100'
-                        : 'border-red-500 bg-red-100'
-                      : 'border-gray-400'} 
-                    `}
-                  
+                    className={`border-b-2 text-left pl-2 mx-1 
+                      ${word.submitted 
+                        ? word.text.toLowerCase() === word.originalWord?.toLowerCase()
+                          ? darkMode ? 'border-green-500 bg-green-900/30 text-green-300' : 'border-green-500 bg-green-100'
+                          : darkMode ? 'border-red-500 bg-red-900/30 text-red-300' : 'border-red-500 bg-red-100'
+                        : darkMode ? 'border-gray-600 bg-gray-700 text-gray-200' : 'border-gray-400 bg-white'
+                      }`}
                     disabled={word.submitted}
-                    size={Math.max(10, word.originalWord?.length || 0)}
+                    style={{
+                      width: `${Math.max(4, word.originalWord?.length || 0) * 10}px`,
+                      minWidth: '60px'
+                    }}
                   />
                   {word.submitted && word.text.toLowerCase() !== word.originalWord?.toLowerCase() && (
-                    <span className="text-xs text-red-600 block pl-2">{word.originalWord}</span>
+                    <span className={`text-xs block pl-2 ${
+                      darkMode ? 'text-red-400' : 'text-red-600'
+                    }`}>
+                      {word.originalWord}
+                    </span>
                   )}
                 </span>
               ) : (
-                word.text
+                <span className={darkMode ? "text-gray-200" : "text-gray-800"}>
+                  {word.text}
+                </span>
               )}
             </span>
           ))}
@@ -129,12 +155,22 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
         {!submitted ? (
           <button
             onClick={handleSubmit}
-            className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700"
+            className={`py-2 px-4 rounded-md transition-colors ${
+              darkMode 
+                ? 'bg-green-600 hover:bg-green-500 text-white'
+                : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
           >
             Check Answers
           </button>
         ) : (
-          <div className="text-green-700 font-medium">
+          <div className={`font-medium ${
+            words.filter(word => word.isBlank).every(
+              word => word.text.toLowerCase() === word.originalWord?.toLowerCase()
+            ) 
+              ? darkMode ? 'text-green-400' : 'text-green-700'
+              : darkMode ? 'text-amber-400' : 'text-amber-700'
+          }`}>
             {words.filter(word => word.isBlank).every(
               word => word.text.toLowerCase() === word.originalWord?.toLowerCase()
             ) 

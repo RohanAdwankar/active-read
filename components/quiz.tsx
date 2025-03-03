@@ -5,9 +5,10 @@ import { Question } from '../types';
 
 interface QuizProps {
   text: string;
+  darkMode?: boolean;
 }
 
-export default function Quiz({ text }: QuizProps) {
+export default function Quiz({ text, darkMode = false }: QuizProps) {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
@@ -84,17 +85,17 @@ export default function Quiz({ text }: QuizProps) {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-        <p className="mt-4 text-gray-600">Generating quiz questions...</p>
+      <div className={`flex flex-col items-center justify-center h-64 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        <div className={`animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 ${darkMode ? 'border-blue-400' : 'border-blue-500'}`}></div>
+        <p className={`mt-4 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>Generating quiz questions...</p>
       </div>
     );
   }
   
   if (questions.length === 0) {
     return (
-      <div className="text-center p-4">
-        <p className="text-gray-700">Unable to generate quiz questions for this text.</p>
+      <div className={`text-center p-4 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+        <p>Unable to generate quiz questions for this text.</p>
       </div>
     );
   }
@@ -102,16 +103,24 @@ export default function Quiz({ text }: QuizProps) {
   if (showResult) {
     return (
       <div className="text-center">
-        <h3 className="text-xl font-bold mb-4">Quiz Complete!</h3>
-        <p className="text-lg mb-3">Your Score: {score}/{questions.length}</p>
-        <p className="mb-6">
+        <h3 className={`text-xl font-bold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+          Quiz Complete!
+        </h3>
+        <p className={`text-lg mb-3 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+          Your Score: {score}/{questions.length}
+        </p>
+        <p className={`mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-600'}`}>
           {score === questions.length
             ? "Perfect! You've mastered this section."
             : "Good effort! Review the paragraph again for better understanding."}
         </p>
         <button 
           onClick={handleRestart}
-          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          className={`px-4 py-2 rounded-md ${
+            darkMode
+              ? 'bg-blue-600 hover:bg-blue-500 text-white'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
         >
           Retry Quiz
         </button>
@@ -121,17 +130,28 @@ export default function Quiz({ text }: QuizProps) {
 
   return (
     <div style={{ minWidth: '300px' }}>
-      <h3 className="text-lg font-semibold mb-4">Quiz: Question {currentQuestion + 1}/{questions.length}</h3>
+      <h3 className={`text-lg font-semibold mb-4 ${darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+        Quiz: Question {currentQuestion + 1}/{questions.length}
+      </h3>
       
-      <p className="mb-4">{questions[currentQuestion].question}</p>
+      <p className={`mb-4 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
+        {questions[currentQuestion].question}
+      </p>
       
       <div className="space-y-3 mb-6">
         {questions[currentQuestion].options.map((option, index) => (
           <div 
             key={index}
             onClick={() => handleAnswerSelect(index)}
-            className={`p-3 border rounded-md cursor-pointer
-              ${selectedAnswer === index ? 'bg-blue-100 border-blue-500' : 'hover:bg-gray-50'}`}
+            className={`p-3 border rounded-md cursor-pointer transition-colors duration-200 ${
+              selectedAnswer === index 
+                ? darkMode
+                  ? 'bg-blue-900/50 border-blue-500 text-blue-100'
+                  : 'bg-blue-100 border-blue-500 text-blue-900'
+                : darkMode
+                  ? 'border-gray-700 text-gray-200 hover:bg-gray-700'
+                  : 'border-gray-300 hover:bg-gray-50 text-gray-800'
+            }`}
           >
             {option}
           </div>
@@ -143,8 +163,12 @@ export default function Quiz({ text }: QuizProps) {
         disabled={selectedAnswer === null}
         className={`w-full py-2 rounded-md ${
           selectedAnswer !== null
-            ? 'bg-blue-600 text-white hover:bg-blue-700'
-            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            ? darkMode
+              ? 'bg-blue-600 hover:bg-blue-500 text-white'
+              : 'bg-blue-600 hover:bg-blue-700 text-white'
+            : darkMode
+              ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
         }`}
       >
         {currentQuestion < questions.length - 1 ? 'Next Question' : 'Finish Quiz'}
