@@ -37,3 +37,6 @@ The application features a client-side text processing algorithm that intelligen
 2. Create a .env file with a free Groq API Key GROQ_API_KEY=
 3. Run npm install, npm run dev
 4. Open http://localhost:3000 with your browser to start using Active Reader.
+
+## Background
+This project was created for the Hack on the Hill Hackathon at UCLA in 8 hours, and won Best Overall there.
