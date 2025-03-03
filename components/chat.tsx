@@ -88,7 +88,7 @@ export default function Chat({ context, darkMode = false }: ChatProps) {
       <div className={`flex-1 overflow-y-auto mb-4 p-4 rounded-md ${
         darkMode ? 'bg-gray-700 border border-gray-600' : 'bg-gray-50 border border-gray-200'
       }`}
-        style={{ maxHeight: '280px', minHeight: '200px' }}
+        style={{ minHeight: '200px' }}
       >
         {messages.length === 0 ? (
           <div className={`text-center py-8 ${darkMode ? 'text-gray-300' : 'text-gray-500'}`}>

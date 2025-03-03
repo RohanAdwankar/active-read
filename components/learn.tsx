@@ -99,7 +99,7 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
               />
               
               {/* Only show buttons after paragraph is completed */}
-              {completedParagraphs[index] && (
+              {completedParagraphs[index] || true && (
                 <div 
                   className="mt-6 flex gap-3 transition-all animate-fadeIn" 
                   id={`paragraph-actions-${index}`}
@@ -185,22 +185,9 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
           )}
         </div>
         
-        {/* Chat sidebar */}
         <div className={`fixed right-0 top-0 bottom-0 w-64 p-4 h-screen pt-20 z-10
           ${settings?.darkMode ? 'bg-gray-800 text-gray-200 border-l border-gray-700' : 'bg-white text-gray-800 border-l border-gray-200'}`}>
-          <div className="mb-6">
-            <h3 className={`text-lg font-semibold mb-2 ${settings?.darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-              Chat Assistant
-            </h3>
-            <p className={`text-sm mb-4 ${settings?.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              Ask questions about the text you're reading
-            </p>
-          </div>
-          
-          <Chat 
-            context={fullText}
-            darkMode={settings?.darkMode}
-          />
+          <Chat context={fullText} darkMode={settings?.darkMode} />
         </div>
       </div>
     </div>
