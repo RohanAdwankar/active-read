@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 import {Word} from '../types';
 
@@ -8,9 +8,10 @@ interface TextProcessorProps {
   processedText: Word[];
   onComplete: (score: number, total: number) => void;
   isParagraph?: boolean;
+  isFirst?: boolean;
 }
 
-export default function TextProcessor({ processedText, onComplete, isParagraph = false }: TextProcessorProps) {
+export default function TextProcessor({ processedText, onComplete, isParagraph = false, isFirst = false }: TextProcessorProps) {
   const [words, setWords] = useState<Word[]>(processedText);
   const [submitted, setSubmitted] = useState(false);
 
@@ -30,12 +31,24 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
     onComplete(correct, blanks.length);
   };
 
+  useEffect(() => {
+    if (!isFirst) return;
+    const blanks = words.filter(word => word.isBlank);
+    const firstBlank = blanks[0];
+    if (firstBlank) {
+      const firstInput = document.getElementById(`input-${firstBlank.id}`);
+      if (firstInput) {
+        (firstInput as HTMLInputElement).focus();
+      }
+    }
+  }, []);
+
   return (
     <div className={isParagraph ? "" : "w-full max-w-3xl mx-auto my-8"}>
       <div className={`bg-white p-6 rounded-lg ${!isParagraph ? 'shadow' : ''}`}>
         <div className="text-lg leading-relaxed mb-4">
           {words.map((word) => (
-            <span key={word.id} className="mr-1">
+            <span key={word.id}>
               {word.isBlank ? (
                 <span className="inline-block">
                   <input
@@ -70,11 +83,13 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
                     id={`input-${word.id}`}
                     
                     className={`w-${Math.max(5, word.originalWord?.length || 0) * 8}px border-b-2 text-left pl-2 mx-1 
-                      ${word.submitted 
-                        ? word.text.toLowerCase() === word.originalWord?.toLowerCase()
-                          ? 'border-green-500 bg-green-100'
-                          : 'border-red-500 bg-red-100'
-                        : 'border-gray-400'}`}
+                    ${word.submitted 
+                      ? word.text.toLowerCase() === word.originalWord?.toLowerCase()
+                        ? 'border-green-500 bg-green-100'
+                        : 'border-red-500 bg-red-100'
+                      : 'border-gray-400'} 
+                    `}
+                  
                     disabled={word.submitted}
                     size={Math.max(10, word.originalWord?.length || 0)}
                   />

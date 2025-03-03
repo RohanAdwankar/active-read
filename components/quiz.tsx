@@ -120,7 +120,7 @@ export default function Quiz({ text }: QuizProps) {
   }
 
   return (
-    <div>
+    <div style={{ minWidth: '300px' }}>
       <h3 className="text-lg font-semibold mb-4">Quiz: Question {currentQuestion + 1}/{questions.length}</h3>
       
       <p className="mb-4">{questions[currentQuestion].question}</p>
