@@ -143,7 +143,7 @@ export default function Chat({ context, darkMode = false }: ChatProps) {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          className={`w-full p-2 rounded-md border text-sm ${
+          className={`w-full p-2 pr-10 rounded-md border text-sm ${
             darkMode
               ? 'bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
               : 'bg-white border-gray-300 text-gray-900 focus:border-blue-400 focus:ring-1 focus:ring-blue-400'

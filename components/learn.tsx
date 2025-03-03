@@ -19,8 +19,9 @@ interface LearnProps {
 export default function Learn({ processedText, onBack, settings, pageTitle }: LearnProps) {
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeParagraph, setActiveParagraph] = useState<number | null>(null);
-  const [score, setScore] = useState<{correct: number, total: number} | null>(null);
   const [showSummary, setShowSummary] = useState(false);
+  const [completedParagraphs, setCompletedParagraphs] = useState<{[key: number]: boolean}>({});
+  const [score, setScore] = useState<{correct: number, total: number} | null>(null);
 
   // Group words into paragraphs
   const paragraphs = groupIntoParagraphs(processedText);
@@ -37,9 +38,19 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
     setShowQuiz(false);
   };
   
-  const handleComplete = (correct: number, total: number) => {
-    setScore({ correct, total });
+  // Update the handleComplete function to track which paragraphs are completed
+  const handleComplete = (correct: number, total: number, paragraphIndex: number) => {
+    console.log("Paragraph completed:", paragraphIndex, "Score:", correct, "/", total);
+    
+    // Mark this paragraph as completed
+    setCompletedParagraphs(prevState => {
+      return { 
+        ...prevState, 
+        [paragraphIndex]: true 
+      };
+    });
 
+    setScore({ correct, total });
   };
 
   // Get the full text content for context
@@ -54,7 +65,7 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
     <div className="flex flex-col gap-4">
       <div className="flex flex-col md:flex-row gap-4">
         {/* Main content area */}
-        <div className="flex-grow">
+        <div className="flex-grow md:w-3/4 pr-72">
           <div className="mb-4">
             <button 
               onClick={onBack} 
@@ -80,40 +91,80 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
             <div key={index} className="mb-10">
               <TextProcessor 
                 processedText={paragraph} 
-                onComplete={handleComplete}
+                onComplete={(correct, total) => handleComplete(correct, total, index)}
                 isParagraph={true}
                 isFirst={index === 0}
+                darkMode={settings?.darkMode}
+                paragraphIndex={index} // Pass the paragraph index
               />
               
-              <div className="mt-4 flex gap-3">
-                <button
-                  onClick={() => handleQuizActivate(index)}
-                  className={`px-4 py-2 rounded-md text-white ${
-                    settings?.darkMode 
-                      ? 'bg-purple-600 hover:bg-purple-500' 
-                      : 'bg-purple-600 hover:bg-purple-700'
-                  }`}
+              {/* Only show buttons after paragraph is completed */}
+              {completedParagraphs[index] && (
+                <div 
+                  className="mt-6 flex gap-3 transition-all animate-fadeIn" 
+                  id={`paragraph-actions-${index}`}
                 >
-                  Quiz on this paragraph
-                </button>
-                <button
-                  onClick={() => handleSummaryActivate(index)}
-                  className={`px-4 py-2 rounded-md text-white ${
-                    settings?.darkMode 
-                      ? 'bg-green-600 hover:bg-green-500' 
-                      : 'bg-green-600 hover:bg-green-700'
-                  }`}
-                >
-                  Summarize this paragraph
-                </button>
-              </div>
+                  <button
+                    onClick={() => handleQuizActivate(index)}
+                    ref={completedParagraphs[index] && !activeParagraph ? (el) => el?.focus() : null}
+                    className={`px-4 py-2 rounded-md text-white ${
+                      settings?.darkMode 
+                        ? 'bg-purple-600 hover:bg-purple-500' 
+                        : 'bg-purple-600 hover:bg-purple-700'
+                    }`}
+                  >
+                    Quiz on this paragraph
+                  </button>
+                  <button
+                    onClick={() => handleSummaryActivate(index)}
+                    className={`px-4 py-2 rounded-md text-white ${
+                      settings?.darkMode 
+                        ? 'bg-green-600 hover:bg-green-500' 
+                        : 'bg-green-600 hover:bg-green-700'
+                    }`}
+                  >
+                    Summarize this paragraph
+                  </button>
+                </div>
+              )}
               
-              {activeParagraph === index && showSummary && (
-                <Summary 
-                  text={getParagraphText(paragraph)} 
-                  onClose={() => setShowSummary(false)}
-                  darkMode={settings?.darkMode} 
-                />
+              {/* Display Quiz or Summary based on what was clicked */}
+              {activeParagraph === index && (
+                <div className="mt-6 animate-fadeIn">
+                  {showQuiz && (
+                    <div className={`p-4 rounded-lg ${
+                      settings?.darkMode 
+                        ? 'bg-purple-900/30 border border-purple-700' 
+                        : 'bg-purple-50 border border-purple-200'
+                    }`}>
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className={`font-semibold text-lg ${settings?.darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
+                          Quiz on Paragraph
+                        </h3>
+                        <button 
+                          onClick={() => setShowQuiz(false)}
+                          className={`${settings?.darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
+                      </div>
+                      <Quiz 
+                        text={getParagraphText(paragraphs[activeParagraph])}
+                        darkMode={settings?.darkMode}
+                      />
+                    </div>
+                  )}
+                  
+                  {showSummary && (
+                    <Summary 
+                      text={getParagraphText(paragraph)} 
+                      onClose={() => setShowSummary(false)}
+                      darkMode={settings?.darkMode} 
+                    />
+                  )}
+                </div>
               )}
             </div>
           ))}
@@ -134,54 +185,22 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
           )}
         </div>
         
-        {/* Sidebar */}
-        <div className={`w-full md:w-80 p-4 rounded-lg shadow fixed right-6 max-w-xs
-          ${settings?.darkMode ? 'bg-gray-800 text-gray-200' : 'bg-white text-gray-800'}`}>
+        {/* Chat sidebar */}
+        <div className={`fixed right-0 top-0 bottom-0 w-64 p-4 h-screen pt-20 z-10
+          ${settings?.darkMode ? 'bg-gray-800 text-gray-200 border-l border-gray-700' : 'bg-white text-gray-800 border-l border-gray-200'}`}>
           <div className="mb-6">
             <h3 className={`text-lg font-semibold mb-2 ${settings?.darkMode ? 'text-gray-100' : 'text-gray-800'}`}>
-              Learning Tools
+              Chat Assistant
             </h3>
-            <div className={`flex border-b ${settings?.darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-              <button
-                className={`py-2 px-4 border-b-2 ${
-                  showQuiz 
-                    ? settings?.darkMode ? 'border-blue-500 text-blue-400' : 'border-blue-600 text-blue-600' 
-                    : 'border-transparent'
-                } ${settings?.darkMode ? 'hover:text-blue-300' : 'hover:text-blue-800'}`}
-                onClick={() => setShowQuiz(true)}
-              >
-                Quiz
-              </button>
-              <button
-                className={`py-2 px-4 border-b-2 ${
-                  !showQuiz 
-                    ? settings?.darkMode ? 'border-blue-500 text-blue-400' : 'border-blue-600 text-blue-600'
-                    : 'border-transparent'
-                } ${settings?.darkMode ? 'hover:text-blue-300' : 'hover:text-blue-800'}`}
-                onClick={() => setShowQuiz(false)}
-              >
-                Chat
-              </button>
-            </div>
+            <p className={`text-sm mb-4 ${settings?.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+              Ask questions about the text you're reading
+            </p>
           </div>
           
-          {showQuiz && activeParagraph !== null ? (
-            <Quiz 
-              text={getParagraphText(paragraphs[activeParagraph])}
-              darkMode={settings?.darkMode}
-            />
-          ) : (
-            <Chat 
-              context={fullText}
-              darkMode={settings?.darkMode}
-            />
-          )}
-          
-          {!showQuiz && (
-            <div className={`mt-4 text-center text-sm ${settings?.darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-              <p>Start a conversation about what you're reading</p>
-            </div>
-          )}
+          <Chat 
+            context={fullText}
+            darkMode={settings?.darkMode}
+          />
         </div>
       </div>
     </div>
