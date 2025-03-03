@@ -47,11 +47,55 @@ export async function POST(req: NextRequest) {
     const numberOfBlanks = Math.max(5, Math.floor(candidates.length * frequency));
     
     const shuffled = [...candidates].sort(() => 0.5 - Math.random());
-    const selectedForBlanks = shuffled.slice(0, numberOfBlanks);
+    
+    // Select non-consecutive blanks
+    const selectedForBlanks: Word[] = [];
+    const selectedIds = new Set<number>();
+    
+    // Helper function to check if adding this word would create consecutive blanks
+    const wouldCreateConsecutiveBlanks = (wordId: number): boolean => {
+      // Find the actual position in the words array
+      const position = words.findIndex(w => w.id === wordId);
+      
+      // Check previous word (if it exists)
+      if (position > 0) {
+        const prevWordId = words[position - 1].id;
+        if (selectedIds.has(prevWordId)) return true;
+      }
+      
+      // Check next word (if it exists)
+      if (position < words.length - 1) {
+        const nextWordId = words[position + 1].id;
+        if (selectedIds.has(nextWordId)) return true;
+      }
+      
+      return false;
+    };
+    
+    // Select candidates that don't create consecutive blanks
+    for (const candidate of shuffled) {
+      if (selectedForBlanks.length >= numberOfBlanks) break;
+      
+      if (!wouldCreateConsecutiveBlanks(candidate.id)) {
+        selectedForBlanks.push(candidate);
+        selectedIds.add(candidate.id);
+      }
+    }
+    
+    // If we don't have enough blanks, make another pass with less strict criteria
+    if (selectedForBlanks.length < numberOfBlanks) {
+      for (const candidate of shuffled) {
+        if (selectedForBlanks.length >= numberOfBlanks) break;
+        if (!selectedIds.has(candidate.id)) {
+          selectedForBlanks.push(candidate);
+          selectedIds.add(candidate.id);
+        }
+      }
+    }
     
     // Blank out the selected words
     const processedText: Word[] = words.map(word => {
-      if (selectedForBlanks.some(blank => blank.id === word.id)) {
+      if (selectedIds.has(word.id)) {
         return {
           ...word,
           isBlank: true,
