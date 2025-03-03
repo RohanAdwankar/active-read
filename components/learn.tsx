@@ -79,14 +79,7 @@ export default function Learn({ processedText, onBack, settings, pageTitle }: Le
           </div>
           
           <h2 className="text-2xl font-bold mb-6">{ (pageTitle) ? pageTitle : "Active Reading" }</h2>
-          
-          {settings && (
-            <div className="inline-block bg-gray-100 rounded-md px-3 py-1 text-sm text-gray-600 mb-6 select-none">
-              Exercise difficulty: <span className="font-medium">{settings.blankFrequency}%</span> 
-              <span className="ml-1 text-xs text-gray-500"></span>
-            </div>
-          )}
-          
+                    
           {paragraphs.map((paragraph, index) => (
             <div key={index} className="mb-10">
               <TextProcessor 
