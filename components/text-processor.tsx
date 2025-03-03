@@ -15,6 +15,27 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
   const [words, setWords] = useState<Word[]>(processedText);
   const [submitted, setSubmitted] = useState(false);
 
+  // Check if paragraph is too short (less than 5 words)
+  if (processedText.length < 5) {
+    return null; // Don't render this paragraph
+  }
+
+  // Check if we have any blanks to fill in
+  const blanksCount = processedText.filter(word => word.isBlank).length;
+  if (blanksCount === 0) {
+    return (
+      <div className={isParagraph ? "" : "w-full max-w-3xl mx-auto my-8"}>
+        <div className={`bg-white p-6 rounded-lg ${!isParagraph ? 'shadow' : ''}`}>
+          <div className="text-lg leading-relaxed mb-4">
+            {processedText.map((word) => (
+              <span key={word.id}>{word.text}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const handleInputChange = (id: number, value: string) => {
     setWords(words.map(word => 
       word.id === id ? { ...word, text: value } : word
@@ -47,18 +68,19 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
     <div className={isParagraph ? "" : "w-full max-w-3xl mx-auto my-8"}>
       <div className={`bg-white p-6 rounded-lg ${!isParagraph ? 'shadow' : ''}`}>
         <div className="text-lg leading-relaxed mb-4">
-          {words.map((word) => (
-            <span key={word.id}>
+          {words.map((word, index) => (
+            <span key={word.id} className={index > 0 ? "ml-1" : ""}>
               {word.isBlank ? (
                 <span className="inline-block">
                   <input
                     type="text"
-                    value={word.text}
+                    value={word.text || ''}
                     onChange={(e) => handleInputChange(word.id, e.target.value)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === 'Tab') {
                         e.preventDefault();
                     
+                        // Mark this input as submitted
                         setWords((prevWords) =>
                           prevWords.map((w) =>
                             w.id === word.id ? { ...w, submitted: true } : w
@@ -66,7 +88,7 @@ export default function TextProcessor({ processedText, onComplete, isParagraph =
                         );
                     
                         // Find the next blank input field
-                        const blanks = words.filter(w => w.isBlank);
+                        const blanks = words.filter(w => w.isBlank && !w.submitted);
                         const currentIndex = blanks.findIndex(w => w.id === word.id);
                         const nextWord = blanks[currentIndex + 1];
                     
